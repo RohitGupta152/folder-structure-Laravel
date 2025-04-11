@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Rate_chart\Services;
+namespace App\modules\Rate_chart\Services;
 
 class RateChartService
 {

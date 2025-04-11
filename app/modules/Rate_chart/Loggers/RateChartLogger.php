@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Rate_chart\Loggers;
+namespace App\modules\Rate_chart\Loggers;
 
 class RateChartLogger
 {

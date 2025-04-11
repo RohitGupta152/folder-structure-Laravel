@@ -270,6 +270,7 @@ class OrderController extends Controller
     }
 
 
+    /*  Admin and sub-Admin can Update order Status ->        status = 0, is_deleted = 1  */
     public function updateOrderStatus(Request $request): JsonResponse
     {
         try {

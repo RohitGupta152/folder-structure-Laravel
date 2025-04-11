@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Rate_chart\Controllers;
+namespace App\modules\Rate_chart\Controllers;
 
 use App\Http\Controllers\Controller;
 

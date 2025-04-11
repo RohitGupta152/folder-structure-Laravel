@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Rate_chart\Helpers;
+namespace App\modules\Rate_chart\Helpers;
 
 class RateChartHelper
 {

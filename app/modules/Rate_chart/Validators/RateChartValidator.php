@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Rate_chart\Validators;
+namespace App\modules\Rate_chart\Validators;
 
 class RateChartValidator
 {
