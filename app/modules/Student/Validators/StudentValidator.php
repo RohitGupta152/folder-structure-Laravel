@@ -218,14 +218,6 @@ use App\Repository\Interfaces\StudentRepositoryInterface;
 
 class StudentValidator
 {
-    protected StudentRepositoryInterface $studentRepository;
-
-    public function __construct(StudentRepositoryInterface $studentRepository)
-    {
-        $this->studentRepository = $studentRepository;
-    }
-
-
     public function validateForCreate(StudentBO $student, bool $isEmailTaken): void
     {
         if ($student->getEmail() && $isEmailTaken) {

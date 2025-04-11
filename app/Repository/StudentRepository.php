@@ -1,72 +1,5 @@
 <?php
 
-// namespace App\Repository;
-
-// use App\Models\Student;
-// use App\Repository\Interfaces\StudentRepositoryInterface;
-// use Carbon\Carbon;
-
-// class StudentRepository implements StudentRepositoryInterface
-// {
-//     public function create(array $data)
-//     {
-//         return Student::create($data);
-//     }
-
-//     public function getStudents(array $filters)
-//     {
-//         $query = Student::query();
-
-//         if (!empty($filters['user_id'])) {
-//             $query->where('user_id', $filters['user_id']);
-//         }
-
-//         if (!empty($filters['name'])) {
-//             $query->where('name', 'like', '%' . $filters['name'] . '%');
-//         }
-
-//         if (!empty($filters['email'])) {
-//             $query->where('email', $filters['email']);
-//         }
-
-//         if (!empty($filters['age'])) {
-//             $query->where('age', $filters['age']);
-//         }
-
-//         if (!empty($filters['course'])) {
-//             $query->where('course', 'like', '%' . $filters['course'] . '%');
-//         }
-
-//         return $query->get();
-//     }
-
-//     public function update(int $id, array $data)
-//     {
-//         $student = Student::find($id);
-
-//         if (!$student) {
-//             return null;
-//         }
-
-//         $student->update($data);
-
-//         return $student->fresh();
-//     }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// app/Repository/Eloquent/StudentRepository.php
 
 namespace App\Repository;
 
@@ -149,7 +82,7 @@ class StudentRepository implements StudentRepositoryInterface
         return false;
     }
 
-    
+
     public function getStudent(array $filters): array
     {
         $query = $this->model->query();

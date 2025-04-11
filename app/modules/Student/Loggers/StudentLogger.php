@@ -3,11 +3,22 @@
 namespace App\Modules\Student\Loggers;
 
 use App\Models\Log;
+use App\Repository\Interfaces\StudentRepositoryInterface;
 use Carbon\Carbon;
+use GuzzleHttp\Promise\Create;
 use Illuminate\Support\Facades\Auth;
 
 class StudentLogger
 {
+
+    protected $studentRepositoryInterface;
+
+    public function __construct(StudentRepositoryInterface $studentRepositoryInterface)
+    {
+        $this->studentRepositoryInterface = $studentRepositoryInterface;
+    }
+
+
     public function insertLog(string $action, array $data): void
     {
         Log::create([
@@ -46,5 +57,17 @@ class StudentLogger
             'performed_by' => Auth::id() ?? null,
             'performed_at' => Carbon::now(),
         ]);
+    }
+
+    public function createStudent(array $studentData)
+    {
+        $studentData = $this->studentRepositoryInterface->create($studentData);
+        return $studentData;
+    }
+
+    public function updateStudent(array $existingStudent, array $studentData)
+    {
+        $studentData = $this->studentRepositoryInterface->update($existingStudent, $studentData);
+        return $studentData;
     }
 }

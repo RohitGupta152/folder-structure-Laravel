@@ -43,14 +43,12 @@ class StudentService
             $studentBO->setUpdatedDate($now);
             // dd($student);
 
-            // Step 1: Check email existence via repository
             $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($studentBO->getEmail());
             $isEmailTaken = $checkEmailExists->isNotEmpty();
 
-            // Step 2: Pass flag to validator (which throws exception if invalid)
             $this->studentValidator->validateForCreate($studentBO, $isEmailTaken);
 
-            $createdStudent = $this->studentRepositoryInterface->create($studentBO->toArray());
+            $createdStudent = $this->studentLogger->createStudent($studentBO->toArray());
 
             if (!$createdStudent) {
                 return [
@@ -78,23 +76,17 @@ class StudentService
     public function updateStudent(StudentBO $studentBO): array
     {
         try {
-            // Set updated date
             $studentBO->setUpdatedDate(Carbon::now()->format('Y-m-d H:i:s'));
 
-            // Step 1: Check if email already exists for another student
-            $checkEmailExists = $this->studentRepositoryInterface->checkEmailExistsForOther(
+            $checkEmailExistsForOther = $this->studentRepositoryInterface->checkEmailExistsForOther(
                 $studentBO->getEmail(),
                 $studentBO->getId()
             );
-            // dd($checkEmailExists);
-            $isEmailTaken = $checkEmailExists->isNotEmpty();
+            $isEmailTaken = $checkEmailExistsForOther->isNotEmpty();
 
-            // Step 2: Validate update (throws exception if invalid)
             $this->studentValidator->validateForUpdate($studentBO, $isEmailTaken);
 
-            // Step 3: Fetch existing student
             $existingStudent = $this->studentRepositoryInterface->findById($studentBO->getId());
-            // dd($existingStudent);
 
             if (!$existingStudent) {
                 return [
@@ -103,8 +95,7 @@ class StudentService
                 ];
             }
 
-            // Step 4: Perform update
-            $updatedStudent = $this->studentRepositoryInterface->update($existingStudent, $studentBO->toArray());
+            $updatedStudent = $this->studentLogger->updateStudent($existingStudent, $studentBO->toArray());
 
             if (!$updatedStudent) {
                 return [
@@ -113,7 +104,6 @@ class StudentService
                 ];
             }
 
-            // Step 5: Log the update
             $this->studentLogger->updateLog('Update', $existingStudent, $studentBO->toArray());
 
             return [
@@ -132,7 +122,6 @@ class StudentService
     public function deleteStudent(StudentBO $studentBO): array
     {
         try {
-            // Step 1: Fetch existing student
             $existingStudent = $this->studentRepositoryInterface->findById($studentBO->getId());
 
             if (!$existingStudent) {
@@ -142,7 +131,6 @@ class StudentService
                 ];
             }
 
-            // Step 2: Delete from repository
             $deleted = $this->studentRepositoryInterface->deleteById($studentBO->getId());
 
             if (!$deleted) {
@@ -152,7 +140,6 @@ class StudentService
                 ];
             }
 
-            // Step 3: Log the delete action
             $this->studentLogger->deleteLog('Delete', $existingStudent);
 
             return [
@@ -178,6 +165,8 @@ class StudentService
                 'age' => $studentBO->getAge(),
                 'course' => $studentBO->getCourse(),
             ];
+            // $filters = $studentBO->toArray();
+            // dd($filters);
 
             $result = $this->studentRepositoryInterface->getStudent($filters);
 

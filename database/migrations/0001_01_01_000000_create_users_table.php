@@ -23,7 +23,11 @@ return new class extends Migration
             $table->string('password');
             $table->tinyInteger('user_type')->default(3)->comment('1 = Admin, 2 = Sub-admin, 3 = User'); // Add this code for Role Type
             $table->rememberToken();
-            $table->timestamps();
+            // $table->timestamps();
+            $table->dateTime('created_date')->nullable();
+            $table->dateTime('updated_date')->nullable();
+
+            $table->index('id');
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
