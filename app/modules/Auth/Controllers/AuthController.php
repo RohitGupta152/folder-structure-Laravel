@@ -3,16 +3,25 @@
 namespace App\Modules\Auth\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\AdminUserRequest;
+use App\Http\Requests\Auth\LoginUserRequest;
+use App\Http\Requests\Auth\RegisterUserRequest;
+use App\Http\Requests\Auth\UpdateUserRequest;
 use Illuminate\Http\JsonResponse;
 use App\Modules\Auth\BO\AuthBO;
 use App\Modules\Auth\Services\AuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Auth\Access\AuthorizationException;
 
 class AuthController extends Controller
 {
-    public function registerUser(Request $request): JsonResponse
+    use AuthorizesRequests;
+
+    public function registerUser(RegisterUserRequest $request): JsonResponse
     {
         try {
             $authBO = app(AuthBO::class);
@@ -41,7 +50,7 @@ class AuthController extends Controller
         }
     }
 
-    public function adminRegister(Request $request): JsonResponse
+    public function adminRegister(AdminUserRequest $request): JsonResponse
     {
         try {
             $authBO = app(AuthBO::class);
@@ -71,7 +80,7 @@ class AuthController extends Controller
         }
     }
 
-    public function loginUser(Request $request): JsonResponse
+    public function loginUser(LoginUserRequest $request): JsonResponse
     {
         try {
             $authBO = app(AuthBO::class);
@@ -134,7 +143,7 @@ class AuthController extends Controller
         }
     }
 
-    public function updateUser(Request $request): JsonResponse
+    public function updateUser(UpdateUserRequest $request): JsonResponse
     {
         try {
             $authBO = app(AuthBO::class);
@@ -188,6 +197,69 @@ class AuthController extends Controller
                 'message' => 'Something went wrong!',
                 'errors' => app()->environment('local') ? [$e->getMessage()] : [],
             ], 500);
+        }
+    }
+
+
+
+    public function adminSubAdminDashboard(Request $request)
+    {
+        $user = $request->user();
+        abort_if(!$user, 401, 'Unauthorized - You need to log in first.');
+
+        try {
+            $this->authorize('isAdminOrSubAdmin', $user);
+            return response()->json(['message' => 'Access granted: Welcome to the Admin & Sub-Admin Dashboard.'], 200);
+        } catch (AuthorizationException $e) {
+            return response()->json(['error' => 'Access denied: Only Admins and Sub-Admins can access this dashboard.'], 403);
+        }
+    }
+
+    /**
+     * Admin Dashboard
+     */
+    public function adminDashboard(Request $request)
+    {
+        $user = $request->user();
+        abort_if(!$user, 401, 'Unauthorized - You need to log in first.');
+
+        try {
+            $this->authorize('isAdmin', $user);
+            return response()->json(['message' => 'Access granted: Welcome to the Admin Dashboard.'], 200);
+        } catch (AuthorizationException $e) {
+            return response()->json(['error' => 'Access denied: Only Admins can access this dashboard.'], 403);
+        }
+    }
+
+    /**
+     * Sub-Admin Dashboard
+     */
+    public function subAdminDashboard(Request $request)
+    {
+        $user = $request->user();
+        abort_if(!$user, 401, 'Unauthorized - You need to log in first.');
+
+        try {
+            $this->authorize('isSubAdmin', $user);
+            return response()->json(['message' => 'Access granted: Welcome to the Sub-Admin Dashboard.'], 200);
+        } catch (AuthorizationException $e) {
+            return response()->json(['error' => 'Access denied: Only Sub-Admins can access this dashboard.'], 403);
+        }
+    }
+
+    /**
+     * User Dashboard
+     */
+    public function userDashboard(Request $request)
+    {
+        $user = $request->user();
+        abort_if(!$user, 401, 'Unauthorized - You need to log in first.');
+
+        try {
+            $this->authorize('isUser', $user);
+            return response()->json(['message' => 'Access granted: Welcome to the User Dashboard.'], 200);
+        } catch (AuthorizationException $e) {
+            return response()->json(['error' => 'Access denied: Only regular users can access this dashboard.'], 403);
         }
     }
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\RateChart;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetOrderRequest extends FormRequest
+class GetRatesRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,16 +22,25 @@ class GetOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'order_no' => 'nullable|string',
-            'customer_name' => 'nullable|string',
+            'user_id' => 'required|numeric',
+            'weight' => 'nullable|numeric',
             'created_date' => 'nullable|string|regex:/^\d{4}-\d{2}-\d{2} \d{4}-\d{2}-\d{2}$/',
         ];
     }
 
-    public function messages(): array
+    public function messages(): array 
+    {
+        return[
+            // 'user_id.required' => 'User ID is required', 
+            // 'user_id.numeric' => 'User ID must be a number',
+        ];
+    }
+
+    public function attributes(): array
     {
         return [
-            'created_date.regex' => 'The date format must be: yyyy-mm-dd yyyy-mm-dd (e.g., 2025-03-01 2025-03-10).',
+            'user_id' => 'Rate chart users id ',
+            'weight' => 'Weight (kg)',
         ];
     }
 }

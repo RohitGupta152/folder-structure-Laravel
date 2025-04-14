@@ -2,6 +2,7 @@
 
 namespace App\Modules\Auth\Services;
 
+use App\Models\User;
 use App\Modules\Auth\BO\AuthBO;
 use App\Modules\Auth\Loggers\AuthLogger;
 use App\Modules\Auth\Validators\AuthValidator;
@@ -9,20 +10,28 @@ use App\Repository\Interfaces\AuthRepositoryInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 
+use App\Repository\Interfaces\UserRepositoryInterface;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Gate;
+
 class AuthService
 {
     protected $authRepositoryInterface;
     protected $authValidator;
     protected $authLogger;
+    protected $userRepositoryInterface;
+
 
     public function __construct(
         AuthRepositoryInterface $authRepositoryInterface,
         AuthValidator $authValidator,
-        AuthLogger $authLogger
+        AuthLogger $authLogger,
+        UserRepositoryInterface $userRepositoryInterface
     ) {
         $this->authRepositoryInterface = $authRepositoryInterface;
         $this->authValidator = $authValidator;
         $this->authLogger = $authLogger;
+        $this->userRepositoryInterface = $userRepositoryInterface;
     }
 
     public function registerUser(AuthBO $authBO): array
@@ -242,5 +251,109 @@ class AuthService
                 'status_code' => 500
             ];
         }
+    }
+
+
+
+
+
+
+
+
+
+    public function createUser(array $data)
+    {
+        if (Gate::denies('create', User::class)) {
+            throw new AuthorizationException('Access denied: Only Admins can create users.');
+        }
+        return $this->userRepositoryInterface->create($data);
+    }
+
+    public function getUserList()
+    {
+        if (Gate::denies('viewAny', User::class)) {
+            throw new AuthorizationException(message: 'Access denied: Only Admins and Sub-Admins can view users.');
+        }
+
+        // Use Policies instead of Gate
+        // $this->authorize('viewAny', User::class);
+
+        $users = $this->userRepositoryInterface->getAll();
+
+        return $this->formatUserList($users);
+    }
+
+    public function formatUserList($users)
+    {
+        $formattedUsers = [];
+
+        foreach ($users as $user) {
+            $formattedUsers[] = [
+                'name' => $user->name,
+                'email' => $user->email,
+                'user_type' => $user->user_type,
+                'created_at' => date('d M y  h:i A', strtotime($user['created_at'])),
+                'updated_at' => date('d M y  h:i A', strtotime($user['updated_at'])),
+            ];
+        }
+
+        return $formattedUsers;
+    }
+
+
+    public function getUserById($userId)
+    {
+        $user = $this->userRepositoryInterface->findById($userId);
+
+        if (Gate::denies('view', $user)) {
+            throw new AuthorizationException('Access denied: You cannot view this user.');
+        }
+
+        $users = $this->formatUser($user);
+
+        return $users;
+    }
+
+    public function formatUser($user)
+    {
+        return [
+            'name' => $user->name,
+            'email' => $user->email,
+            'user_type' => $user->user_type,
+            'created_at' => date('d M y  h:i A', strtotime($user['created_at'])),
+            'updated_at' => date('d M y  h:i A', strtotime($user['updated_at'])),
+        ];
+    }
+
+    public function updateUserById($userId, array $data)
+    {
+        $user = $this->userRepositoryInterface->findById($userId);
+
+        if (Gate::denies('update', $user)) {
+            throw new AuthorizationException('Access denied: You cannot update this user.');
+        }
+        return $this->userRepositoryInterface->update($userId, $data);
+    }
+
+    public function updateUserByIdAndRole($userId, array $data)
+    {
+        $user = $this->userRepositoryInterface->findById($userId);
+        if (Gate::denies('updateRole', $user)) {
+            throw new AuthorizationException('Access denied: You cannot update this user\'s role.');
+        }
+        return $this->userRepositoryInterface->update($userId, $data);
+    }
+
+    public function deleteUserById($userId, $data)
+    {
+        $user = $this->userRepositoryInterface->findById($userId);
+        // dd($user);
+        // dd($user->toArray());
+
+        if (Gate::denies('delete', $user)) {
+            // dd(Gate::denies('delete', $user));
+            throw new AuthorizationException('Access denied: Only administrators can delete users.');
+        }
+        $this->userRepositoryInterface->delete($userId, $data);
     }
 }

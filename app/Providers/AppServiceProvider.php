@@ -24,15 +24,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(StudentRepositoryInterface::class, StudentRepository::class);
-
         $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
-
         $this->app->bind(OrderRepositoryInterface::class, OrderRepository::class);
-
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-
         $this->app->bind(RateChartRepositoryInterface::class, RateChartRepository::class);
-
         $this->app->bind(ProductRepositoryInterface::class, ProductRepository::class);
 
         // Register StudentBO as a singleton so it can be resolved from the container

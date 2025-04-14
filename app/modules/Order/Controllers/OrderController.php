@@ -14,11 +14,11 @@ is_deleted -> 0 = Order Active,
 namespace App\modules\Order\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateOrderRequest;
-use App\Http\Requests\DeleteOrderRequest;
-use App\Http\Requests\GetOrderRequest;
-use App\Http\Requests\UpdateOrderProductRequest;
-use App\Http\Requests\UpdateOrderRequest;
+use App\Http\Requests\Order\CreateOrderRequest;
+use App\Http\Requests\Order\DeleteOrderRequest;
+use App\Http\Requests\Order\GetOrderRequest;
+use App\Http\Requests\Order\UpdateOrderProductRequest;
+use App\Http\Requests\Order\UpdateOrderRequest;
 use App\modules\Order\services\OrderService;
 use App\modules\Order\BO\OrderBO;
 use Illuminate\Http\JsonResponse;

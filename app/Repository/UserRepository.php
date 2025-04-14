@@ -22,4 +22,44 @@ class UserRepository implements UserRepositoryInterface {
         ]);
     }
 
+
+
+
+
+    public function getAll()
+    {
+        return User::all();
+    }
+
+    public function findById($userId)
+    {
+        return User::findOrFail($userId);
+    }
+
+    public function create(array $data)
+    {
+        return User::create($data);
+    }
+
+    public function update($userId, array $data)
+    {
+        $user = $this->findById($userId);
+        $user->update($data);
+        return $user;
+    }
+    
+    public function updateRole($userId, array $data)
+    {
+        $user = $this->findById($userId);
+        $user->update($data);
+        return $user;
+    }
+
+    public function delete($userId, array $data)
+    {
+        $user = $this->findById($userId);
+        $user->delete();
+        return $user;
+    }
+
 }

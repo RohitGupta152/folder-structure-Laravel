@@ -5,15 +5,18 @@ namespace App\Modules\Student\Controllers;
 
 use App\Http\Controllers\Controller;
 
-use App\Http\Requests\StudentCreateRequest;
-use App\Http\Requests\StudentDeleteRequest;
-use App\Http\Requests\StudentGetRequest;
-use App\Http\Requests\StudentUpdateRequest;
+use App\Http\Requests\Student\StudentCreateRequest;
+use App\Http\Requests\Student\StudentDeleteRequest;
+use App\Http\Requests\Student\StudentGetRequest;
+use App\Http\Requests\Student\StudentUpdateRequest;
+use App\Models\Student;
 use App\Modules\Student\BO\StudentBO;
 // use App\Modules\Student\Requests\StudentCreateRequest;
 use App\Modules\Student\Services\StudentService;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 // use Illuminate\Support\Facades\Request;
@@ -23,6 +26,7 @@ use Illuminate\Support\Facades\Log;
 
 class StudentController extends Controller
 {
+    use AuthorizesRequests;
     public function createStudent(StudentCreateRequest $request): JsonResponse
     {
         try {
@@ -148,6 +152,7 @@ class StudentController extends Controller
     public function getStudent(StudentGetRequest $request): JsonResponse
     {
         try {
+            // $this->authorize('viewAny', Student::class);
             $studentBO = app(StudentBO::class);
             $studentService = app(StudentService::class);
 
@@ -182,6 +187,15 @@ class StudentController extends Controller
                 'errors' => app()->environment('local') ? [$e->getMessage()] : null
             ], 500);
         }
+        // catch (AuthorizationException $e) {
+        //     // Handle authorization errors
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => 'Unauthorized: ' . $e->getMessage()
+        //     ], 403);
+
+        // }
+
     }
 
     public function exportStudent(StudentGetRequest $request): JsonResponse

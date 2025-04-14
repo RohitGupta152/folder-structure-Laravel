@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Order;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateOrderRequest extends FormRequest
+class DeleteOrderRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,14 +23,6 @@ class UpdateOrderRequest extends FormRequest
     {
         return [
             'order_no' => 'required|string',
-            'email' => 'required|email',
-            'contact_no' => 'required|string',
-            'address1' => 'required|string',
-            'address2' => 'required|string',
-            'pin_code' => 'required|string',
-            'city' => 'required|string',
-            'state' => 'required|string',
-            'country' => 'required|string',
         ];
     }
 }
