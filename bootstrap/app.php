@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Response;
+use App\Console\Commands\GetDBNameCommand;
 
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -41,4 +42,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ], Response::HTTP_UNAUTHORIZED);
         });
 
-    })->create();
+    })
+    ->withCommands([
+    \App\Console\Commands\GetDBNameCommand::class,
+    \App\Console\Commands\DatabaseConnectionTestCommand::class,
+    \App\Console\Commands\MultiConnectionTestCommand::class,
+    \App\Console\Commands\DatabaseQueryPerformanceCommand::class,
+    ])->create();
