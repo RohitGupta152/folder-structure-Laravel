@@ -258,7 +258,8 @@ class StudentService
             $errors = [];
 
             foreach ($fileContents as $index => $line) {
-                $data = explode(',', $line);
+                // $data = explode(',', $line);
+                $data = str_getcsv($line); 
 
                 if (count($data) >= 6) {
                     try {

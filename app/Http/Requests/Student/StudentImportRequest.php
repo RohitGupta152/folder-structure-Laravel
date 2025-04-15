@@ -17,7 +17,7 @@ class StudentImportRequest extends FormRequest
             'file' => [
                 'required',
                 'file',
-                'mimes:csv,txt',  // Only allow CSV and TXT files
+                'mimes:csv',  // Only allow CSV files
                 'max:10240',      // Maximum file size of 10MB
             ]
         ];
@@ -27,7 +27,7 @@ class StudentImportRequest extends FormRequest
     {
         return [
             'file.required' => 'Please upload a file.',
-            'file.mimes' => 'The file must be a CSV or TXT file.',
+            'file.mimes' => 'The file must be a CSV file.',
             'file.max' => 'The file size must not exceed 10MB.',
         ];
     }

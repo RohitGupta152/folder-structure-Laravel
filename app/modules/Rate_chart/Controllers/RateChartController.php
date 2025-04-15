@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RateChart\CreateRateRequest;
 use App\Http\Requests\RateChart\DeleteRatesRequest;
 use App\Http\Requests\RateChart\GetRatesRequest;
+use App\Http\Requests\RateChart\RateChartImportRequest;
 use App\Http\Requests\RateChart\UpdateRatesRequest;
 use App\modules\Rate_chart\BO\RateChartBO;
 use App\modules\Rate_chart\Services\RateChartService;
@@ -137,6 +138,21 @@ class RateChartController extends Controller
                 'status' => 'error',
                 'message' => $e->getMessage()
             ], 404);
+        }
+    }
+
+    public function importRates(RateChartImportRequest $request): JsonResponse
+    {
+        try {
+            $rateChartImportService = app(RateChartService::class);
+            $result = $rateChartImportService->handleImport($request);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Import failed: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

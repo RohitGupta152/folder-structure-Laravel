@@ -66,6 +66,7 @@ Route::middleware(['auth:sanctum', 'admin_or_sub-admin'])
 
         Route::post('/get-rates', 'getRates');
         Route::post('/export-rates', 'exportRates');
+        Route::post('/import-rates', 'importRates');
 
         Route::post('/update', 'updateRate');
         Route::post('/delete', 'deleteRate');

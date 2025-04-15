@@ -10,6 +10,8 @@ class RateChartBO
     private ?float $weight = null;
     protected ?float $rateAmount = null;
     private ?string $createdDate = null;
+    private ?string $updatedDate = null;
+
 
 
     public function setUserId(int $userId): void
@@ -73,6 +75,17 @@ class RateChartBO
         return $this;
     }
 
+    public function getUpdatedDate(): ?string
+    {
+        return $this->updatedDate;
+    }
+
+    public function setUpdatedDate(?string $updatedDate): self
+    {
+        $this->updatedDate = $updatedDate;
+        return $this;
+    }
+
 
 
     public function toArray(): array
@@ -91,12 +104,16 @@ class RateChartBO
             $data['created_date'] = $this->createdDate;
         }
 
+        if (isset($this->updatedDate)) {
+            $data['updated_date'] = $this->updatedDate;
+        }
+
         if (isset($this->rateId)) {
             $data['rate_id'] = $this->rateId;
         }
 
         if (isset($this->rateAmount)) {
-            $data['rateAmount'] = $this->rateAmount;
+            $data['rate_amount'] = $this->rateAmount;
         }
 
         return $data;

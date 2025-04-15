@@ -168,4 +168,60 @@ class RateChartService
             'status_code' => 200
         ];
     }
+
+    public function handleImport($request)
+    {
+        try {
+            $file = $request->file('file');
+            $lines = file($file->getPathname());
+            array_shift($lines);
+
+            $importCount = 0;
+            $errorCount = 0;
+            $errors = [];
+
+            foreach ($lines as $index => $line) {
+                $data = str_getcsv($line);
+                // dd($data);
+            
+                if (count($data) >= 5) {
+                    try {
+                        $bo = new RateChartBO();
+                        $bo->setUserId(trim($data[0]));
+                        $bo->setWeight(trim($data[1]));
+                        $bo->setRateAmount(trim($data[2]));
+                        $bo->setCreatedDate($this->rateChartHelper->parseDate(trim($data[3])));
+                        $bo->setUpdatedDate($this->rateChartHelper->parseDate(trim($data[4])));
+
+                        // dd($bo->toArray());
+                        $this->rateChartRepositoryInterface->create($bo->toArray());
+                        $importCount++;
+                    } catch (\Exception $e) {
+                        $errorCount++;
+                        $errors[] = [
+                            'row' => $index + 2,
+                            'error' => $e->getMessage()
+                        ];
+                    }
+                } else {
+                    $errorCount++;
+                    $errors[] = [
+                        'row' => $index + 2,
+                        'error' => 'Insufficient data columns'
+                    ];
+                }
+            }
+            
+
+            return response()->json([
+                'status' => 'success',
+                'imported' => $importCount,
+                'errors' => $errors,
+                'error_count' => $errorCount,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Rate Chart Import Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }
