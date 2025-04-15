@@ -8,11 +8,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Student\StudentCreateRequest;
 use App\Http\Requests\Student\StudentDeleteRequest;
 use App\Http\Requests\Student\StudentGetRequest;
+use App\Http\Requests\Student\StudentImportRequest;
 use App\Http\Requests\Student\StudentUpdateRequest;
 use App\Models\Student;
 use App\Modules\Student\BO\StudentBO;
 // use App\Modules\Student\Requests\StudentCreateRequest;
 use App\Modules\Student\Services\StudentService;
+use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Exception;
@@ -233,6 +235,21 @@ class StudentController extends Controller
             return response()->json([
                 'status' => 'error',
                 'errors' => app()->environment('local') ? [$e->getMessage()] : null
+            ], 500);
+        }
+    }
+
+    public function importStudent(StudentImportRequest $request): JsonResponse
+    {
+        try {
+            $studentImportService = app(StudentService::class);
+            $result = $studentImportService->handleImport($request);
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Import failed: ' . $e->getMessage()
             ], 500);
         }
     }

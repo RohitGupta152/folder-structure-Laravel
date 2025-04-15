@@ -245,4 +245,59 @@ class StudentService
             ];
         }
     }
+
+    public function handleImport($request)
+    {
+        try {
+            $file = $request->file('file');
+            $fileContents = file($file->getPathname());
+            array_shift($fileContents);
+
+            $importCount = 0;
+            $errorCount = 0;
+            $errors = [];
+
+            foreach ($fileContents as $index => $line) {
+                $data = explode(',', $line);
+
+                if (count($data) >= 6) {
+                    try {
+                        $studentBo = new StudentBO();
+                        $studentBo->setName(trim($data[0]));
+                        $studentBo->setEmail(trim($data[1]));
+                        $studentBo->setAge((int)trim($data[2]));
+                        $studentBo->setCourse(trim($data[3]));
+                        $studentBo->setCreatedDate($this->studentHelper->parseDate(trim($data[4])));
+                        $studentBo->setUpdatedDate($this->studentHelper->parseDate(trim($data[5])));
+
+                        $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($studentBo->getEmail());
+                        $this->studentValidator->validateForImpCreate($studentBo, $checkEmailExists);
+
+                        $this->studentLogger->createStudent($studentBo->toArray());
+
+                        $importCount++;
+                    } catch (\Exception $e) {
+                        $errorCount++;
+                        $errors[] = ['row' => $index + 2, 'error' => $e->getMessage()];
+                    }
+                } else {
+                    $errorCount++;
+                    $errors[] = ['row' => $index + 2, 'error' => 'Insufficient columns'];
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'total_rows' => count($fileContents),
+                'imported_count' => $importCount,
+                'error_count' => $errorCount,
+                'errors' => $errors,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Import failed: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

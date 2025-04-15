@@ -14,6 +14,7 @@ Route::prefix('students')->group(function () {
     Route::post('/create', [StudentController::class, 'createStudent']);
     Route::post('/get-student', [StudentController::class, 'getStudent']);
     Route::post('/export-student', [StudentController::class, 'exportStudent']);
+    Route::post('/import', [StudentController::class, 'importStudent']);
     Route::post('/update', [StudentController::class, 'updateStudent']);
     Route::post('/delete', [StudentController::class, 'deleteStudent']);
 });
