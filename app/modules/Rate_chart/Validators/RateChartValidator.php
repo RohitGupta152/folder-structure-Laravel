@@ -93,20 +93,59 @@ class RateChartValidator
         }
     }
 
+    // public function validateCreateRateChartImport(array $rateData, array $existingWeights)
+    // {
+    //     $newWeight = (float) $rateData['weight'];
+
+    //     if (in_array($newWeight, $existingWeights)) {
+    //         throw new Exception("Weight {$newWeight} already exists for this user");
+    //     }
+
+    //     if ($newWeight <= 0) {
+    //         throw new Exception("Weight must be a positive number eg 0.5 kg and More");
+    //     }
+
+    //     if ($newWeight < 0.5 || $newWeight > 100) {
+    //         throw new Exception("Weight must be between 0 and 100 kg");
+    //     }
+    // }
+
+
+    public function avalidateCreateRateChartImport(array $rateData, array $existingWeights)
+    {
+        $newWeight = (float) $rateData['weight'];
+
+        if (in_array($newWeight, $existingWeights)) {
+            return "Weight {$newWeight} already exists for this user";
+        }
+
+        if ($newWeight <= 0) {
+            return "Weight must be a positive number eg 0.5 kg and More";
+        }
+
+        if ($newWeight < 0.5 || $newWeight > 100) {
+            return "Weight must be between 0 and 100 kg";
+        }
+
+        return null; // No validation errors
+    }
+
     public function validateCreateRateChartImport(array $rateData, array $existingWeights)
     {
         $newWeight = (float) $rateData['weight'];
 
         if (in_array($newWeight, $existingWeights)) {
-            throw new Exception("Weight {$newWeight} already exists for this user");
+            return "Weight {$newWeight} already exists for this user";
         }
 
         if ($newWeight <= 0) {
-            throw new Exception("Weight must be a positive number eg 0.5 kg and More");
+            return "Weight must be a positive number eg 0.5 kg and More";
         }
 
         if ($newWeight < 0.5 || $newWeight > 100) {
-            throw new Exception("Weight must be between 0 and 100 kg");
+            return "Weight must be between 0.5 and 100 kg";
         }
+
+        return null; // No validation errors
     }
 }

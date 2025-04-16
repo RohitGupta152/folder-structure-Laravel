@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class RateChartService
@@ -169,84 +171,291 @@ class RateChartService
         ];
     }
 
+    // public function handleImport($request)
+    // {
+    //     try {
+    //         $file = $request->file('file');
+    //         $lines = file($file->getPathname());
+    //         array_shift($lines);
+
+    //         $importCount = 0;
+    //         $errorCount = 0;
+    //         $errors = [];
+
+    //         foreach ($lines as $index => $line) {
+    //             $data = str_getcsv($line);
+    //             // dd($data);
+
+    //             if (count($data) >= 5) {
+    //                 try {
+    //                     $userId = trim($data[0]);
+    //                     $weight = trim($data[1]);
+    //                     $rateAmount = trim($data[2]);
+
+    //                     $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
+    //                     $existingWeights = [];
+
+    //                     foreach ($existingRates as $rate) {
+    //                         $existingWeights[] = (float) $rate['weight'];
+    //                     }
+
+    //                     $rateDataArray = [
+    //                         'user_id' => $userId,
+    //                         'weight' => $weight,
+    //                         'rate_amount' => $rateAmount
+    //                     ];
+
+    //                     $this->rateChartValidator->validateCreateRateChartImport($rateDataArray, $existingWeights);
+
+    //                     $rateChartBo = new RateChartBO();
+    //                     $rateChartBo->setUserId($userId);
+    //                     $rateChartBo->setWeight($weight);
+    //                     $rateChartBo->setRateAmount($rateAmount);
+    //                     $rateChartBo->setCreatedDate($this->rateChartHelper->parseDate(trim($data[3])));
+    //                     $rateChartBo->setUpdatedDate($this->rateChartHelper->parseDate(trim($data[4])));
+
+    //                     $this->rateChartLogger->createRate($rateChartBo->toArray());
+    //                     $importCount++;
+    //                 } catch (\Exception $e) {
+    //                     $errorCount++;
+    //                     $errors[] = [
+    //                         'row' => $index + 2,
+    //                         'error' => $e->getMessage()
+    //                     ];
+    //                 }
+    //             } else {
+    //                 $errorCount++;
+    //                 $errors[] = [
+    //                     'row' => $index + 2,
+    //                     'error' => 'Insufficient data columns'
+    //                 ];
+    //             }
+    //         }
+
+    //         $response = [
+    //             'status' => $errorCount > 0 ? 'error' : 'success',
+    //             'imported' => $importCount,
+    //             'error_count' => $errorCount,
+    //             'errors' => $errors,
+    //         ];
+
+    //         if (!empty($errors)) {
+    //             $response['errors'] = $errors;
+    //         }
+
+    //         return $response;
+    //     } catch (\Exception $e) {
+    //         return [
+    //             'status' => 'error',
+    //             'message' => $e->getMessage()
+    //         ];
+    //     }
+    // }
+
+
+    // public function handleImport($request)
+    // {
+    //     // Get the file from the request
+    //     $file = $request->file('file');
+
+    //     // Store the file in public storage folder
+    //     $filePath = $file->store('imports', 'public');
+
+    //     // Get full path for reading the file
+    //     $fullPath = Storage::disk('public')->path($filePath);
+
+    //     // Read the file content
+    //     $lines = file($fullPath);
+
+    //     // Create a new file with error messages column
+    //     $outputFile = fopen(Storage::disk('public')->path('imports/processed_' . basename($filePath)), 'w');
+
+    //     // Add header with error message column
+    //     $header = str_getcsv($lines[0]);
+    //     $header[] = 'error message';
+    //     fputcsv($outputFile, $header);
+
+    //     // Remove the header row for processing
+    //     array_shift($lines);
+
+    //     $importCount = 0;
+
+    //     // Process each line in the CSV
+    //     foreach ($lines as $index => $line) {
+    //         $data = str_getcsv($line);
+
+    //         // Initialize error message
+    //         $errorMessage = '';
+
+    //         if (count($data) >= 5) {
+    //             $userId = trim($data[0]);
+    //             $weight = trim($data[1]);
+    //             $rateAmount = trim($data[2]);
+    //             $createdDate = trim($data[3]);
+    //             $updatedDate = trim($data[4]);
+
+    //             // Get existing rates for this user
+    //             $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
+    //             $existingWeights = [];
+
+    //             foreach ($existingRates as $rate) {
+    //                 $existingWeights[] = (float) $rate['weight'];
+    //             }
+
+    //             $rateDataArray = [
+    //                 'user_id' => $userId,
+    //                 'weight' => $weight,
+    //                 'rate_amount' => $rateAmount
+    //             ];
+
+    //             // Validate the data
+    //             $validationError = $this->rateChartValidator->validateCreateRateChartImport($rateDataArray, $existingWeights);
+
+    //             if ($validationError) {
+    //                 // If validation failed, add error message
+    //                 $errorMessage = $validationError;
+    //             } else {
+    //                 // If validation passed, save the data
+    //                 $this->rateChartRepositoryInterface->create([
+    //                     'user_id' => $userId,
+    //                     'weight' => $weight,
+    //                     'rate_amount' => $rateAmount,
+    //                     'created_at' => $this->rateChartHelper->parseDate($createdDate),
+    //                     'updated_at' => $this->rateChartHelper->parseDate($updatedDate)
+    //                 ]);
+
+    //                 $importCount++;
+    //             }
+    //         } else {
+    //             // Handle insufficient data columns
+    //             $errorMessage = 'Insufficient data columns';
+    //         }
+
+    //         // Add error message to the row
+    //         $data[] = $errorMessage;
+
+    //         // Write the row to the output file
+    //         fputcsv($outputFile, $data);
+    //     }
+
+    //     // Close the output file
+    //     fclose($outputFile);
+
+    //     // Return the final response
+    //     return [
+    //         'status' => 'success',
+    //         'message' => $importCount . ' records imported successfully',
+    //         'file_path' => Storage::url($filePath)
+    //     ];
+    // }
+
+
     public function handleImport($request)
     {
-        try {
-            $file = $request->file('file');
-            $lines = file($file->getPathname());
-            array_shift($lines);
+        // Get the file from the request
+        $file = $request->file('file');
+        // dd($file);
 
-            $importCount = 0;
-            $errorCount = 0;
-            $errors = [];
+        $simpleFileName = 'rate_chart_import.csv';
 
-            foreach ($lines as $index => $line) {
-                $data = str_getcsv($line);
-                // dd($data);
+        // Store the file in public storage folder
+        $filePath = $file->storeAs('imports', $simpleFileName ,'public');
+        // dd($filePath);
 
-                if (count($data) >= 5) {
-                    try {
-                        $userId = trim($data[0]);
-                        $weight = trim($data[1]);
-                        $rateAmount = trim($data[2]);
+        // Get full path for reading the file
+        $fullPath = Storage::disk('public')->path($filePath);
+        // dd($fullPath);
 
-                        $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
-                        $existingWeights = [];
+        // Read the file content
+        $lines = file($fullPath);
+        // dd($lines);
 
-                        foreach ($existingRates as $rate) {
-                            $existingWeights[] = (float) $rate['weight'];
-                        }
+        // Create a new file with Status and Message columns
+        // $outputFile = fopen(Storage::disk('public')->path('imports/processed_' . $simpleFileName), 'w');
+        $outputFile = fopen(Storage::disk('public')->path('imports/processed_' . basename($filePath)), 'w');
+        // dd($outputFile);
 
-                        $rateDataArray = [
-                            'user_id' => $userId,
-                            'weight' => $weight,
-                            'rate_amount' => $rateAmount
-                        ];
+        // Add header with Status and Message columns
+        $header = str_getcsv($lines[0]);
+        $header[] = 'Status';
+        $header[] = 'Message';
+        fputcsv($outputFile, $header);
 
-                        $this->rateChartValidator->validateCreateRateChartImport($rateDataArray, $existingWeights);
+        // Remove the header row for processing
+        array_shift($lines);
 
-                        $rateChartBo = new RateChartBO();
-                        $rateChartBo->setUserId($userId);
-                        $rateChartBo->setWeight($weight);
-                        $rateChartBo->setRateAmount($rateAmount);
-                        $rateChartBo->setCreatedDate($this->rateChartHelper->parseDate(trim($data[3])));
-                        $rateChartBo->setUpdatedDate($this->rateChartHelper->parseDate(trim($data[4])));
+        $importCount = 0;
 
-                        $this->rateChartLogger->createRate($rateChartBo->toArray());
-                        $importCount++;
-                    } catch (\Exception $e) {
-                        $errorCount++;
-                        $errors[] = [
-                            'row' => $index + 2,
-                            'error' => $e->getMessage()
-                        ];
-                    }
-                } else {
-                    $errorCount++;
-                    $errors[] = [
-                        'row' => $index + 2,
-                        'error' => 'Insufficient data columns'
-                    ];
+        // Process each line in the CSV
+        foreach ($lines as $index => $line) {
+            $data = str_getcsv($line);
+
+            // Initialize status and message
+            $status = 'Success';
+            $message = '';
+
+            if (count($data) >= 5) {
+                $userId = trim($data[0]);
+                $weight = trim($data[1]);
+                $rateAmount = trim($data[2]);
+                $createdDate = trim($data[3]);
+                $updatedDate = trim($data[4]);
+
+                // Get existing rates for this user
+                $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
+                $existingWeights = [];
+
+                foreach ($existingRates as $rate) {
+                    $existingWeights[] = (float) $rate['weight'];
                 }
+
+                $rateDataArray = [
+                    'user_id' => $userId,
+                    'weight' => $weight,
+                    'rate_amount' => $rateAmount
+                ];
+
+                // Validate the data
+                $validationError = $this->rateChartValidator->validateCreateRateChartImport($rateDataArray, $existingWeights);
+
+                if ($validationError) {
+                    // If validation failed, set status to Error and add error message
+                    $status = 'Error';
+                    $message = $validationError;
+                } else {
+                    // If validation passed, save the data
+                    $this->rateChartRepositoryInterface->create([
+                        'user_id' => $userId,
+                        'weight' => $weight,
+                        'rate_amount' => $rateAmount,
+                        'created_at' => $this->rateChartHelper->parseDate($createdDate),
+                        'updated_at' => $this->rateChartHelper->parseDate($updatedDate)
+                    ]);
+
+                    $importCount++;
+                }
+            } else {
+                // Handle insufficient data columns
+                $status = 'Error';
+                $message = 'Insufficient data columns';
             }
 
-            $response = [
-                'status' => $errorCount > 0 ? 'error' : 'success',
-                'imported' => $importCount,
-                'error_count' => $errorCount,
-                'errors' => $errors,
-            ];
+            // Add status and message to the row
+            $data[] = $status;
+            $data[] = $message;
 
-            if (!empty($errors)) {
-                $response['errors'] = $errors;
-            }
-
-            return $response;
-        } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => $e->getMessage()
-            ];
+            // Write the row to the output file
+            fputcsv($outputFile, $data);
         }
+
+        // Close the output file
+        fclose($outputFile);
+
+        // Return the final response
+        return [
+            'status' => 'success',
+            'message' => $importCount . ' records imported successfully',
+            'file_path' => Storage::url($filePath)
+        ];
     }
 }
