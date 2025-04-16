@@ -233,8 +233,8 @@ class RateChartService
             $response = [
                 'status' => $errorCount > 0 ? 'error' : 'success',
                 'imported' => $importCount,
-                'errors' => $errors,
                 'error_count' => $errorCount,
+                'errors' => $errors,
             ];
 
             if (!empty($errors)) {
