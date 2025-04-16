@@ -141,21 +141,6 @@ class RateChartController extends Controller
         }
     }
 
-    // public function importRates(RateChartImportRequest $request): JsonResponse
-    // {
-    //     try {
-    //         $rateChartService = app(RateChartService::class);
-    //         $result = $rateChartService->handleImport($request);
-
-    //         return response()->json($result);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Import failed: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function importRates(RateChartImportRequest $request): JsonResponse
     {
         $rateChartService = app(RateChartService::class);

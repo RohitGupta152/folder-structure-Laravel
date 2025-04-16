@@ -402,7 +402,7 @@ class RateChartService
                 $updatedDate = trim($data[4]);
 
                 // Get existing rates for this user
-                $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
+                $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId)->toArray();
                 $existingWeights = [];
 
                 foreach ($existingRates as $rate) {
@@ -423,14 +423,17 @@ class RateChartService
                     $status = 'Error';
                     $message = $validationError;
                 } else {
-                    // If validation passed, save the data
-                    $this->rateChartRepositoryInterface->create([
-                        'user_id' => $userId,
-                        'weight' => $weight,
-                        'rate_amount' => $rateAmount,
-                        'created_at' => $this->rateChartHelper->parseDate($createdDate),
-                        'updated_at' => $this->rateChartHelper->parseDate($updatedDate)
-                    ]);
+
+                    // Use RateChartBO to set the data
+                    $rateChartBo = new RateChartBO();
+                    $rateChartBo->setUserId($userId);
+                    $rateChartBo->setWeight($weight);
+                    $rateChartBo->setRateAmount($rateAmount);
+                    $rateChartBo->setCreatedDate($this->rateChartHelper->parseDate($createdDate));
+                    $rateChartBo->setUpdatedDate($this->rateChartHelper->parseDate($updatedDate));
+                    
+                    // Create record using the BO
+                    $this->rateChartRepositoryInterface->create($rateChartBo->toArray());
 
                     $importCount++;
                 }

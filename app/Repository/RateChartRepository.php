@@ -23,7 +23,7 @@ class RateChartRepository implements RateChartRepositoryInterface
 
     public function getByUserId(int $userId)
     {
-        return RateChart::where('user_id', $userId)->get()->toArray();
+        return RateChart::where('user_id', $userId)->get();
     }
 
     public function create(array $data): RateChart
