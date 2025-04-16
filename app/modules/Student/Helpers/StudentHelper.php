@@ -47,12 +47,14 @@ class StudentHelper
     public function parseDate($dateString)
     {
         if (empty($dateString)) {
-            return now()->format('Y-m-d H:i:s');
+            return now()->format('Y-m-d h:i:s');
         }
 
         $formats = [
             'Y-m-d H:i:s',
             'Y-m-d H:i',
+            'd-m-Y H:i:s',
+            'd-m-Y H:i',
             'Y-m-d',
             'd-m-Y',
             'm-d-Y',
@@ -71,12 +73,12 @@ class StudentHelper
                     $date->setSeconds(0);
                 }
 
-                return $date->format('Y-m-d H:i:s');
+                return $date->format('Y-m-d h:i:s');
             } catch (\Exception $e) {
                 continue;
             }
         }
 
-        return now()->format('Y-m-d H:i:s');
+        return now()->format('Y-m-d h:i:s');
     }
 }

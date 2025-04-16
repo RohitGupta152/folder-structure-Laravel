@@ -144,8 +144,8 @@ class RateChartController extends Controller
     public function importRates(RateChartImportRequest $request): JsonResponse
     {
         try {
-            $rateChartImportService = app(RateChartService::class);
-            $result = $rateChartImportService->handleImport($request);
+            $rateChartService = app(RateChartService::class);
+            $result = $rateChartService->handleImport($request);
 
             return response()->json($result);
         } catch (\Exception $e) {

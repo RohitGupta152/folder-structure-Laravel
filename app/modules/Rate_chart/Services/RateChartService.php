@@ -35,27 +35,27 @@ class RateChartService
     {
         $userId = $rateChartBO->getUserId();
         $rateDataArray = $rateChartBO->getRateDataArray();
-    
+
         $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
         $existingWeights = [];
-    
+
         foreach ($existingRates as $rate) {
             $existingWeights[] = (float) $rate['weight'];
         }
-    
+
         // ✅ Validation moved to Validator
         $this->rateChartValidator->validateCreateRateData($rateDataArray, $existingWeights);
-    
+
         foreach ($rateDataArray as $rateData) {
             $originalWeight = (float) $rateData['weight'];
             $decimalPart = $originalWeight - floor($originalWeight);
-    
+
             if ($decimalPart > 0 && $decimalPart <= 0.5) {
                 $rateData['weight'] = floor($originalWeight) + 0.5;
             } elseif ($decimalPart > 0.5) {
                 $rateData['weight'] = ceil($originalWeight);
             }
-    
+
             $this->rateChartLogger->createRate([
                 'user_id' => $userId,
                 'weight' => $rateData['weight'],
@@ -64,14 +64,14 @@ class RateChartService
                 'updated_date' => now(),
             ]);
         }
-    
+
         return [
             'status' => "success",
             'message' => 'Rates created successfully.',
             'status_code' => 201
         ];
     }
-    
+
 
     public function getRates(RateChartBO $rateChartBO): array
     {
@@ -183,18 +183,36 @@ class RateChartService
             foreach ($lines as $index => $line) {
                 $data = str_getcsv($line);
                 // dd($data);
-            
+
                 if (count($data) >= 5) {
                     try {
-                        $bo = new RateChartBO();
-                        $bo->setUserId(trim($data[0]));
-                        $bo->setWeight(trim($data[1]));
-                        $bo->setRateAmount(trim($data[2]));
-                        $bo->setCreatedDate($this->rateChartHelper->parseDate(trim($data[3])));
-                        $bo->setUpdatedDate($this->rateChartHelper->parseDate(trim($data[4])));
+                        $userId = trim($data[0]);
+                        $weight = trim($data[1]);
+                        $rateAmount = trim($data[2]);
 
-                        // dd($bo->toArray());
-                        $this->rateChartRepositoryInterface->create($bo->toArray());
+                        $existingRates = $this->rateChartRepositoryInterface->getByUserId($userId);
+                        $existingWeights = [];
+
+                        foreach ($existingRates as $rate) {
+                            $existingWeights[] = (float) $rate['weight'];
+                        }
+
+                        $rateDataArray = [
+                            'user_id' => $userId,
+                            'weight' => $weight,
+                            'rate_amount' => $rateAmount
+                        ];
+
+                        $this->rateChartValidator->validateCreateRateChartImport($rateDataArray, $existingWeights);
+
+                        $rateChartBo = new RateChartBO();
+                        $rateChartBo->setUserId($userId);
+                        $rateChartBo->setWeight($weight);
+                        $rateChartBo->setRateAmount($rateAmount);
+                        $rateChartBo->setCreatedDate($this->rateChartHelper->parseDate(trim($data[3])));
+                        $rateChartBo->setUpdatedDate($this->rateChartHelper->parseDate(trim($data[4])));
+
+                        $this->rateChartLogger->createRate($rateChartBo->toArray());
                         $importCount++;
                     } catch (\Exception $e) {
                         $errorCount++;
@@ -211,17 +229,24 @@ class RateChartService
                     ];
                 }
             }
-            
 
-            return response()->json([
-                'status' => 'success',
+            $response = [
+                'status' => $errorCount > 0 ? 'error' : 'success',
                 'imported' => $importCount,
                 'errors' => $errors,
                 'error_count' => $errorCount,
-            ]);
+            ];
+
+            if (!empty($errors)) {
+                $response['errors'] = $errors;
+            }
+
+            return $response;
         } catch (\Exception $e) {
-            Log::error('Rate Chart Import Error: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => $e->getMessage()], 500);
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ];
         }
     }
 }

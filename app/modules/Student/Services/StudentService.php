@@ -259,7 +259,7 @@ class StudentService
 
             foreach ($fileContents as $index => $line) {
                 // $data = explode(',', $line);
-                $data = str_getcsv($line); 
+                $data = str_getcsv($line);
 
                 if (count($data) >= 6) {
                     try {
@@ -279,26 +279,38 @@ class StudentService
                         $importCount++;
                     } catch (\Exception $e) {
                         $errorCount++;
-                        $errors[] = ['row' => $index + 2, 'error' => $e->getMessage()];
+                        $errors[] = [
+                            'row' => $index + 2,
+                            'error' => $e->getMessage()
+                        ];
                     }
                 } else {
                     $errorCount++;
-                    $errors[] = ['row' => $index + 2, 'error' => 'Insufficient columns'];
+                    $errors[] = [
+                        'row' => $index + 2,
+                        'error' => 'Insufficient columns'
+                    ];
                 }
             }
 
-            return response()->json([
+            $response = [
                 'status' => 'success',
-                'total_rows' => count($fileContents),
+                'total_rows' => count($fileContents), // Subtract header row
                 'imported_count' => $importCount,
                 'error_count' => $errorCount,
-                'errors' => $errors,
-            ]);
+                'errors' => $errors
+            ];
+
+            if (empty($errors)) {
+                unset($response['errors']);
+            }
+
+            return $response;
         } catch (\Exception $e) {
-            return response()->json([
+            return [
                 'status' => 'error',
                 'message' => 'Import failed: ' . $e->getMessage()
-            ], 500);
+            ];
         }
     }
 }

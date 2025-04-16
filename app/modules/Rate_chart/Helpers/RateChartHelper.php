@@ -42,34 +42,41 @@ class RateChartHelper
         return $formatted;
     }
 
-public function parseDate($dateString)
-{
-    if (empty(trim($dateString))) {
-        return now()->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-    }
-
-    $formats = [
-        'Y-m-d H:i:s', 'Y-m-d H:i', 'd-m-Y H:i:s', 'd-m-Y H:i', 
-        'Y-m-d', 'd-m-Y', 'm-d-Y', 'Y/m/d', 'd/m/Y', 'm/d/Y',
-    ];
-
-    foreach ($formats as $format) {
-        try {
-            $date = Carbon::createFromFormat($format, $dateString)->setTimezone('Asia/Kolkata');
-
-            if (strlen($dateString) <= 10) {
-                $date->setTime(0, 0, 0);
-            } elseif (strlen($dateString) <= 16) {
-                $date->setSeconds(0);
-            }
-
-            return $date->format('Y-m-d H:i:s'); // 24-hour format
-        } catch (\Exception $e) {
-            continue;
+    public function parseDate($dateString)
+    {
+        if (empty(trim($dateString))) {
+            return now()->setTimezone('Asia/Kolkata')->format('Y-m-d h:i:s');
         }
+
+        $formats = [
+            'Y-m-d H:i:s',
+            'Y-m-d H:i',
+            'd-m-Y H:i:s',
+            'd-m-Y H:i',
+            'Y-m-d',
+            'd-m-Y',
+            'm-d-Y',
+            'Y/m/d',
+            'd/m/Y',
+            'm/d/Y',
+        ];
+
+        foreach ($formats as $format) {
+            try {
+                $date = Carbon::createFromFormat($format, $dateString)->setTimezone('Asia/Kolkata');
+
+                if (strlen($dateString) <= 10) {
+                    $date->setTime(0, 0, 0);
+                } elseif (strlen($dateString) <= 16) {
+                    $date->setSeconds(0);
+                }
+
+                return $date->format('Y-m-d h:i:s'); // 12-hour format
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
+        return now()->setTimezone('Asia/Kolkata')->format('Y-m-d h:i:s');
     }
-
-    return now()->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-}
-
 }
