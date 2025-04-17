@@ -232,11 +232,13 @@ class StudentValidator
         }
     }
 
-    public function validateForImpCreate(StudentBO $student, $checkEmailExists): void
+    public function validateForImpCreate($email, $checkEmailExists)
     {
-        if ($student->getEmail() && $checkEmailExists->isNotEmpty()) {
-            throw new \Exception('Email already exists in the database');
+        if ($email && !empty($checkEmailExists)) {
+            return "{$email} Email already exists in the database";
         }
+
+        return null;
     }
 
 

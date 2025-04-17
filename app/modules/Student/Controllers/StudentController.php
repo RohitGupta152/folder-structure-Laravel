@@ -241,16 +241,9 @@ class StudentController extends Controller
 
     public function importStudent(StudentImportRequest $request): JsonResponse
     {
-        try {
-            $studentService = app(StudentService::class);
-            $result = $studentService->handleImport($request);
+        $studentService = app(StudentService::class);
+        $result = $studentService->handleImport($request);
 
-            return response()->json($result);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Import failed: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json($result);
     }
 }

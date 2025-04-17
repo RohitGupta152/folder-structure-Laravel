@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 
@@ -248,69 +249,72 @@ class StudentService
 
     public function handleImport($request)
     {
-        try {
-            $file = $request->file('file');
-            $fileContents = file($file->getPathname());
-            array_shift($fileContents);
+        $file = $request->file('file');
+        $simpleFileName = 'student_import.csv';
+        $filePath = $file->storeAs('imports', $simpleFileName, 'public');
+        $fullPath = Storage::disk('public')->path($filePath);
+        $lines = file($fullPath);
 
-            $importCount = 0;
-            $errorCount = 0;
-            $errors = [];
+        $outputFile = fopen(Storage::disk('public')->path('imports/processed_' . basename($filePath)), 'w');
 
-            foreach ($fileContents as $index => $line) {
-                // $data = explode(',', $line);
-                $data = str_getcsv($line);
+        $header = str_getcsv($lines[0]);
+        $header[] = 'Status';
+        $header[] = 'Message';
+        fputcsv($outputFile, $header);
 
-                if (count($data) >= 6) {
-                    try {
-                        $studentBo = new StudentBO();
-                        $studentBo->setName(trim($data[0]));
-                        $studentBo->setEmail(trim($data[1]));
-                        $studentBo->setAge((int)trim($data[2]));
-                        $studentBo->setCourse(trim($data[3]));
-                        $studentBo->setCreatedDate($this->studentHelper->parseDate(trim($data[4])));
-                        $studentBo->setUpdatedDate($this->studentHelper->parseDate(trim($data[5])));
+        array_shift($lines);
+        $importCount = 0;
 
-                        $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($studentBo->getEmail());
-                        $this->studentValidator->validateForImpCreate($studentBo, $checkEmailExists);
+        foreach ($lines as $index => $line) {
+            $data = str_getcsv($line);
+            $status = 'Success';
+            $message = '';
 
-                        $this->studentLogger->createStudent($studentBo->toArray());
+            if (count($data) >= 6) {
+                $name = trim($data[0]);
+                $email = trim($data[1]);
+                $age = (int) trim($data[2]);
+                $course = trim($data[3]);
+                $created_date = trim($data[4]);
+                $updated_date = trim($data[5]);
 
-                        $importCount++;
-                    } catch (\Exception $e) {
-                        $errorCount++;
-                        $errors[] = [
-                            'row' => $index + 2,
-                            'error' => $e->getMessage()
-                        ];
-                    }
+                $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($email)->toArray();
+                $validationError = $this->studentValidator->validateForImpCreate($email, $checkEmailExists);
+
+                if ($validationError) {
+
+                    $status = 'Error';
+                    $message = $validationError;
                 } else {
-                    $errorCount++;
-                    $errors[] = [
-                        'row' => $index + 2,
-                        'error' => 'Insufficient columns'
-                    ];
+                    $studentBo = new StudentBO();
+                    $studentBo->setName($name);
+                    $studentBo->setEmail($email);
+                    $studentBo->setAge($age);
+                    $studentBo->setCourse($course);
+                    $studentBo->setCreatedDate($this->studentHelper->parseDate($created_date));
+                    $studentBo->setUpdatedDate($this->studentHelper->parseDate($updated_date));
+
+                    $this->studentLogger->createStudent($studentBo->toArray());
+                    $importCount++;
                 }
+            } else {
+
+                $status = 'Error';
+                $message = 'Insufficient data columns';
             }
 
-            $response = [
-                'status' => 'success',
-                'total_rows' => count($fileContents), // Subtract header row
-                'imported_count' => $importCount,
-                'error_count' => $errorCount,
-                'errors' => $errors
-            ];
+            $data[] = $status;
+            $data[] = $message;
 
-            if (empty($errors)) {
-                unset($response['errors']);
-            }
-
-            return $response;
-        } catch (\Exception $e) {
-            return [
-                'status' => 'error',
-                'message' => 'Import failed: ' . $e->getMessage()
-            ];
+            fputcsv($outputFile, $data);
         }
+
+        fclose($outputFile);
+
+        return [
+            'status' => 'success',
+            'message' => $importCount . ' records imported successfully',
+            'file_path' => Storage::url($filePath)
+        ];
     }
 }
