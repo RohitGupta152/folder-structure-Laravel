@@ -2,10 +2,13 @@
 
 namespace App\Modules\Student\Services;
 
-use App\Modules\Student\BO\StudentBO;
+use App\Http\Requests\Student\StudentCreateRequest;
+use App\Http\Requests\Student\studentRequest;
+use App\Modules\Student\BO\studentBo;
 use App\Modules\Student\Helpers\StudentHelper;
 use App\Modules\Student\Loggers\StudentLogger;
 use App\Modules\Student\Validators\StudentValidator;
+use App\Repository\StudentDAO\StudentDAO;
 use App\Repository\Interfaces\StudentRepositoryInterface;
 use Carbon\Carbon;
 use Exception;
@@ -21,35 +24,62 @@ class StudentService
     protected StudentValidator $studentValidator;
     protected StudentLogger $studentLogger;
     protected StudentHelper $studentHelper;
+    protected StudentBo $studentBo;
+    protected StudentDAO $studentDAO;
+
 
     public function __construct(
         StudentRepositoryInterface $studentRepositoryInterface,
         StudentValidator $studentValidator,
         StudentLogger $studentLogger,
-        StudentHelper $studentHelper
+        StudentHelper $studentHelper,
+        studentBo $studentBo,
+        StudentDAO $studentDAO
     ) {
         $this->studentRepositoryInterface = $studentRepositoryInterface;
         $this->studentValidator = $studentValidator;
         $this->studentLogger = $studentLogger;
         $this->studentHelper = $studentHelper;
+        $this->studentBo = $studentBo;
+        $this->studentDAO = $studentDAO;
     }
 
 
-    public function createStudent(StudentBO $studentBO): array
+    public function studentBo($studentRequest)
+    {
+        $this->studentBo->setId($studentRequest->input('id'));
+        $this->studentBo->setName($studentRequest->input('name'));
+        $this->studentBo->setEmail($studentRequest->input('email'));
+        $this->studentBo->setAge($studentRequest->input('age'));
+        $this->studentBo->setCourse($studentRequest->input('course'));
+        $now = Carbon::now()->format('Y-m-d h:i:s');
+        $this->studentBo->setCreatedDate($now);
+        $this->studentBo->setUpdatedDate($now);
+        return $this->studentBo;
+    }
+
+    public function studentDAO(StudentBO $StudentBo)
+    {
+        $this->studentDAO->setId($StudentBo->getId());
+        $this->studentDAO->setName($StudentBo->getName());
+        $this->studentDAO->setEmail($StudentBo->getEmail());
+        $this->studentDAO->setAge($StudentBo->getAge());
+        $this->studentDAO->setCourse($StudentBo->getCourse());
+        $this->studentDAO->setCreatedDate($StudentBo->getCreatedDate());
+        $this->studentDAO->setUpdatedDate($StudentBo->getUpdatedDate());
+        // dd($studentDAO);
+        return $this->studentDAO;
+    }
+
+    public function createStudent(StudentBo $studentBo): array
     {
         try {
-            // Set current date for created_date and updated_date
-            $now = Carbon::now()->format('Y-m-d H:i:s');
-            $studentBO->setCreatedDate($now);
-            $studentBO->setUpdatedDate($now);
-            // dd($student);
+            $studentData = $this->studentDAO($studentBo);
 
-            $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($studentBO->getEmail());
-            $isEmailTaken = $checkEmailExists->isNotEmpty();
+            $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($studentData->getEmail())->toArray();
+            $this->studentValidator->validateForCreate($studentData->getEmail(), $checkEmailExists);
 
-            $this->studentValidator->validateForCreate($studentBO, $isEmailTaken);
-
-            $createdStudent = $this->studentLogger->createStudent($studentBO->toArray());
+            $createdStudent = $this->studentLogger->createStudent($studentData->toArray());
 
             if (!$createdStudent) {
                 return [
@@ -74,20 +104,19 @@ class StudentService
         }
     }
 
-    public function updateStudent(StudentBO $studentBO): array
+    public function updateStudent(studentBo $studentBo): array
     {
         try {
-            $studentBO->setUpdatedDate(Carbon::now()->format('Y-m-d H:i:s'));
+            $studentData = $this->studentDAO($studentBo);
 
             $checkEmailExistsForOther = $this->studentRepositoryInterface->checkEmailExistsForOther(
-                $studentBO->getEmail(),
-                $studentBO->getId()
-            );
-            $isEmailTaken = $checkEmailExistsForOther->isNotEmpty();
+                $studentData->getEmail(),
+                $studentData->getId()
+            )->toArray();
 
-            $this->studentValidator->validateForUpdate($studentBO, $isEmailTaken);
+            $this->studentValidator->validateForUpdate($studentData->getEmail(), $checkEmailExistsForOther);
 
-            $existingStudent = $this->studentRepositoryInterface->findById($studentBO->getId());
+            $existingStudent = $this->studentRepositoryInterface->findById($studentData->getId());
 
             if (!$existingStudent) {
                 return [
@@ -96,7 +125,7 @@ class StudentService
                 ];
             }
 
-            $updatedStudent = $this->studentLogger->updateStudent($existingStudent, $studentBO->toArray());
+            $updatedStudent = $this->studentLogger->updateStudent($existingStudent, $studentData->toArray());
 
             if (!$updatedStudent) {
                 return [
@@ -105,7 +134,7 @@ class StudentService
                 ];
             }
 
-            $this->studentLogger->updateLog('Update', $existingStudent, $studentBO->toArray());
+            $this->studentLogger->updateLog('Update', $existingStudent, $studentData->toArray());
 
             return [
                 'status' => 'success',
@@ -120,10 +149,12 @@ class StudentService
         }
     }
 
-    public function deleteStudent(StudentBO $studentBO): array
+    public function deleteStudent(studentBo $studentBo): array
     {
         try {
-            $existingStudent = $this->studentRepositoryInterface->findById($studentBO->getId());
+            $studentData = $this->studentDAO($studentBo);
+
+            $existingStudent = $this->studentRepositoryInterface->findById($studentData->getId());
 
             if (!$existingStudent) {
                 return [
@@ -132,7 +163,7 @@ class StudentService
                 ];
             }
 
-            $deleted = $this->studentRepositoryInterface->deleteById($studentBO->getId());
+            $deleted = $this->studentRepositoryInterface->deleteById($studentData->getId());
 
             if (!$deleted) {
                 return [
@@ -156,18 +187,18 @@ class StudentService
         }
     }
 
-    public function getStudent(StudentBO $studentBO): array
+    public function getStudent(studentBo $studentBo): array
     {
         try {
+            $studentData = $this->studentDAO($studentBo);
+
             $filters = [
-                'id' => $studentBO->getId(),
-                'name' => $studentBO->getName(),
-                'email' => $studentBO->getEmail(),
-                'age' => $studentBO->getAge(),
-                'course' => $studentBO->getCourse(),
+                'id' => $studentData->getId(),
+                'name' => $studentData->getName(),
+                'email' => $studentData->getEmail(),
+                'age' => $studentData->getAge(),
+                'course' => $studentData->getCourse(),
             ];
-            // $filters = $studentBO->toArray();
-            // dd($filters);
 
             $result = $this->studentRepositoryInterface->getStudent($filters);
 
@@ -202,15 +233,17 @@ class StudentService
         }
     }
 
-    public function exportStudent(StudentBO $studentBO): array
+    public function exportStudent(studentBo $studentBo): array
     {
         try {
+            $studentData = $this->studentDAO($studentBo);
+            
             $filters = [
-                'id'     => $studentBO->getId(),
-                'name'   => $studentBO->getName(),
-                'email'  => $studentBO->getEmail(),
-                'age'    => $studentBO->getAge(),
-                'course' => $studentBO->getCourse(),
+                'id'     => $studentData->getId(),
+                'name'   => $studentData->getName(),
+                'email'  => $studentData->getEmail(),
+                'age'    => $studentData->getAge(),
+                'course' => $studentData->getCourse(),
             ];
 
             $students = $this->studentRepositoryInterface->getStudent($filters);
@@ -286,7 +319,7 @@ class StudentService
                     $status = 'Error';
                     $message = $validationError;
                 } else {
-                    $studentBo = new StudentBO();
+                    $studentBo = new studentBo();
                     $studentBo->setName($name);
                     $studentBo->setEmail($email);
                     $studentBo->setAge($age);

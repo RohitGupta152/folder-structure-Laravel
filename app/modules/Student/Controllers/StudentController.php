@@ -29,18 +29,15 @@ use Illuminate\Support\Facades\Log;
 class StudentController extends Controller
 {
     use AuthorizesRequests;
-    public function createStudent(StudentCreateRequest $request): JsonResponse
+    public function createStudent(StudentCreateRequest $studentRequest): JsonResponse
     {
         try {
             $studentBO = app(StudentBO::class);
             $studentService = app(StudentService::class);
 
-            $studentBO->setName($request->input('name'));
-            $studentBO->setEmail($request->input('email'));
-            $studentBO->setAge($request->input('age'));
-            $studentBO->setCourse($request->input('course'));
+            $studentBo = $studentService->studentBo($studentRequest);
 
-            $result = $studentService->createStudent($studentBO);
+            $result = $studentService->createStudent($studentBo);
 
             if ($result['status'] === 'success') {
                 return response()->json([
@@ -71,20 +68,15 @@ class StudentController extends Controller
         }
     }
 
-    public function updateStudent(StudentUpdateRequest $request): JsonResponse
+    public function updateStudent(StudentUpdateRequest $studentRequest): JsonResponse
     {
         try {
             $studentBO = app(StudentBO::class);
             $studentService = app(StudentService::class);
 
-            $studentBO->setId($request->input('id')); // Required for update
-            $studentBO->setName($request->input('name'));
-            $studentBO->setEmail($request->input('email'));
-            $studentBO->setAge($request->input('age'));
-            $studentBO->setCourse($request->input('course'));
-            // dd($StudentBO);
+            $studentBo = $studentService->studentBo($studentRequest);
 
-            $result = $studentService->updateStudent($studentBO);
+            $result = $studentService->updateStudent($studentBo);
 
             if ($result['status'] === 'success') {
                 return response()->json([
@@ -113,16 +105,15 @@ class StudentController extends Controller
         }
     }
 
-    public function deleteStudent(StudentDeleteRequest $request): JsonResponse
+    public function deleteStudent(StudentDeleteRequest $studentRequest): JsonResponse
     {
         try {
             $studentBO = app(StudentBO::class);
             $studentService = app(StudentService::class);
 
-            $studentBO->setId($request->input('id'));
-            // dd($studentBO);
+            $studentBo = $studentService->studentBo($studentRequest);
 
-            $result = $studentService->deleteStudent($studentBO);
+            $result = $studentService->deleteStudent($studentBo);
 
             if ($result['status'] === 'success') {
                 return response()->json([
@@ -151,20 +142,16 @@ class StudentController extends Controller
         }
     }
 
-    public function getStudent(StudentGetRequest $request): JsonResponse
+    public function getStudent(StudentGetRequest $studentRequest): JsonResponse
     {
         try {
             // $this->authorize('viewAny', Student::class);
             $studentBO = app(StudentBO::class);
             $studentService = app(StudentService::class);
 
-            $studentBO->setId($request->input('id'));
-            $studentBO->setName($request->input('name'));
-            $studentBO->setEmail($request->input('email'));
-            $studentBO->setAge($request->input('age'));
-            $studentBO->setCourse($request->input('course'));
+            $studentBo = $studentService->studentBo($studentRequest);
 
-            $result = $studentService->getStudent($studentBO);
+            $result = $studentService->getStudent($studentBo);
 
             if ($result['status'] === 'success') {
                 return response()->json([
@@ -200,19 +187,15 @@ class StudentController extends Controller
 
     }
 
-    public function exportStudent(StudentGetRequest $request): JsonResponse
+    public function exportStudent(StudentGetRequest $studentRequest): JsonResponse
     {
         try {
             $studentBO = app(StudentBO::class);
             $studentService = app(StudentService::class);
 
-            $studentBO->setId($request->input('id'));
-            $studentBO->setName($request->input('name'));
-            $studentBO->setEmail($request->input('email'));
-            $studentBO->setAge($request->input('age'));
-            $studentBO->setCourse($request->input('course'));
+            $studentBo = $studentService->studentBo($studentRequest);
 
-            $result = $studentService->exportStudent($studentBO);
+            $result = $studentService->exportStudent($studentBo);
 
             if ($result['status'] === 'success') {
                 return response()->json([

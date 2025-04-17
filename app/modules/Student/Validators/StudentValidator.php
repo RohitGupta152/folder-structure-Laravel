@@ -218,16 +218,16 @@ use App\Repository\Interfaces\StudentRepositoryInterface;
 
 class StudentValidator
 {
-    public function validateForCreate(StudentBO $student, bool $isEmailTaken): void
+    public function validateForCreate($studentEmail, array $checkEmailExists): void
     {
-        if ($student->getEmail() && $isEmailTaken) {
+        if ($studentEmail && !empty($checkEmailExists)) {
             throw new \Exception('Email already exists in the database');
         }
     }
 
-    public function validateForUpdate(StudentBO $student, bool $isEmailTaken): void
+    public function validateForUpdate($studentEmail, array $checkEmailExistsForOther): void
     {
-        if ($student->getEmail() && $isEmailTaken) {
+        if ($studentEmail && !empty($checkEmailExistsForOther)) {
             throw new \Exception('Email already exists for another student');
         }
     }
