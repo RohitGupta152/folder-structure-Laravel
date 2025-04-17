@@ -237,7 +237,7 @@ class StudentService
     {
         try {
             $studentData = $this->studentDAO($studentBo);
-            
+
             $filters = [
                 'id'     => $studentData->getId(),
                 'name'   => $studentData->getName(),
@@ -306,18 +306,18 @@ class StudentService
             if (count($data) >= 6) {
                 $name = trim($data[0]);
                 $email = trim($data[1]);
-                $age = (int) trim($data[2]);
+                $age = trim($data[2]);
                 $course = trim($data[3]);
                 $created_date = trim($data[4]);
                 $updated_date = trim($data[5]);
 
                 $checkEmailExists = $this->studentRepositoryInterface->checkEmailExists($email)->toArray();
-                $validationError = $this->studentValidator->validateForImpCreate($email, $checkEmailExists);
+                $validationError = $this->studentValidator->validateForImpCreate($email, $checkEmailExists, $age);
 
                 if ($validationError) {
 
                     $status = 'Error';
-                    $message = $validationError;
+                    $message = $validationError . ' - Data creation failed';
                 } else {
                     $studentBo = new studentBo();
                     $studentBo->setName($name);

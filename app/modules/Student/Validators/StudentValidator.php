@@ -232,10 +232,14 @@ class StudentValidator
         }
     }
 
-    public function validateForImpCreate($email, $checkEmailExists)
+    public function validateForImpCreate($email, $checkEmailExists, $age)
     {
         if ($email && !empty($checkEmailExists)) {
             return "{$email} Email already exists in the database";
+        }
+
+        if (!is_numeric($age) || intval($age) != $age) {
+            return "Invalid format, Age should be an integer";
         }
 
         return null;
