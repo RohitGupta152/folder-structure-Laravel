@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Log;
 use App\Jobs\DelayJob;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SomeController;
 
 Route::get('/cache-test', function () {
     $cacheKey = 'test_data';
@@ -229,3 +231,7 @@ Route::get('/http-concurrent', function () {
         'time_taken' => round($end - $start, 2) . ' seconds',
     ]);
 });
+
+Route::get('/context', [HomeController::class, 'index']);
+
+Route::get('/test-job', [SomeController::class, 'dispatchJob']);
