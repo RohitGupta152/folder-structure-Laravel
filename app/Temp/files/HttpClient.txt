@@ -1,0 +1,190 @@
+Here’s a comprehensive list of **all major HTTP Client features** provided by Laravel’s fluent HTTP client (based on Guzzle), with **examples for each**:
+
+---
+
+### ✅ 1. **Basic GET Request**
+```php
+$response = Http::get('https://api.example.com/posts');
+$data = $response->json();
+```
+
+---
+
+### ✅ 2. **POST Request**
+```php
+$response = Http::post('https://api.example.com/posts', [
+    'title' => 'New Post',
+    'body' => 'This is the content.',
+]);
+```
+
+---
+
+### ✅ 3. **PUT Request**
+```php
+Http::put('https://api.example.com/posts/1', [
+    'title' => 'Updated Title',
+]);
+```
+
+---
+
+### ✅ 4. **PATCH Request**
+```php
+Http::patch('https://api.example.com/posts/1', [
+    'title' => 'Partially Updated Title',
+]);
+```
+
+---
+
+### ✅ 5. **DELETE Request**
+```php
+Http::delete('https://api.example.com/posts/1');
+```
+
+---
+
+### ✅ 6. **Add Headers**
+```php
+Http::withHeaders([
+    'Authorization' => 'Bearer your-token',
+])->get('https://api.example.com/profile');
+```
+
+---
+
+### ✅ 7. **Authentication**
+```php
+Http::withToken('your-token')->get('https://api.example.com/profile');
+```
+
+---
+
+### ✅ 8. **Query Parameters**
+```php
+Http::get('https://api.example.com/posts', [
+    'category' => 'news',
+    'limit' => 5,
+]);
+```
+
+---
+
+### ✅ 9. **Handling JSON**
+```php
+$response = Http::post('https://api.example.com/data', [
+    'name' => 'John',
+]);
+
+$data = $response->json(); // Parses JSON into array
+```
+
+---
+
+### ✅ 10. **Timeout & Retry**
+```php
+Http::timeout(5)->retry(3, 100)->get('https://api.example.com/slow');
+```
+
+- `timeout(5)` – max wait 5 seconds
+- `retry(3, 100)` – 3 attempts, 100ms delay
+
+---
+
+### ✅ 11. **Asynchronous Requests**
+```php
+$promise = Http::async()->get('https://api.example.com/data');
+$response = $promise->wait();
+```
+
+---
+
+### ✅ 12. **Accepting JSON**
+```php
+Http::acceptJson()->get('https://api.example.com/data');
+```
+
+---
+
+### ✅ 13. **Attach Cookies**
+```php
+Http::withCookies([
+    'name' => 'value',
+], 'example.com')->get('https://example.com');
+```
+
+---
+
+### ✅ 14. **Multipart/Form File Upload**
+```php
+Http::attach(
+    'file', file_get_contents(storage_path('app/file.pdf')), 'file.pdf'
+)->post('https://api.example.com/upload');
+```
+
+---
+
+### ✅ 15. **Saving Response File**
+```php
+Http::get('https://example.com/image.jpg')
+    ->save(storage_path('app/public/image.jpg'));
+```
+
+---
+
+### ✅ 16. **Status Checking**
+```php
+$response = Http::get('https://api.example.com/status');
+
+if ($response->successful()) {
+    // All good
+} elseif ($response->failed()) {
+    // Something went wrong
+}
+```
+
+---
+
+### ✅ 17. **Throw Exceptions on Failure**
+```php
+$response = Http::get('https://api.example.com/data')->throw();
+```
+
+---
+
+### ✅ 18. **Inspect Response**
+```php
+$response->status();   // HTTP status code
+$response->body();     // Raw response
+$response->json();     // Parsed JSON
+$response->headers();  // All headers
+```
+
+---
+
+### ✅ 19. **Fake HTTP for Testing**
+```php
+Http::fake([
+    'api.example.com/*' => Http::response(['message' => 'Success'], 200),
+]);
+
+$response = Http::get('https://api.example.com/test');
+```
+
+---
+
+### ✅ 20. **Middleware (Macros)**
+```php
+Http::macro('github', function () {
+    return Http::withHeaders([
+        'Authorization' => 'Bearer github-token',
+    ]);
+});
+
+$response = Http::github()->get('https://api.github.com/user');
+```
+
+---
+
+Would you like me to generate a cheat sheet or visual chart summarizing all these features?

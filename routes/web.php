@@ -10,6 +10,7 @@ use App\Jobs\DelayJob;
 use Illuminate\Support\Facades\Concurrency;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\HttpClient;
 use App\Http\Controllers\SomeController;
 
 Route::get('/cache-test', function () {
@@ -235,3 +236,5 @@ Route::get('/http-concurrent', function () {
 Route::get('/context', [HomeController::class, 'index']);
 
 Route::get('/test-job', [SomeController::class, 'dispatchJob']);
+
+Route::get('/test-http', [HttpClient::class, 'testClient']);
