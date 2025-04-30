@@ -4,15 +4,15 @@
 namespace App\Repository;
 
 use App\Repository\Interfaces\AuthRepositoryInterface;
-
+use App\Events\UserRegistered;
 use App\Models\User;
 
 class AuthRepository implements AuthRepositoryInterface
 {
     public function create(array $data): array
     {
-        // dd($data);
         $user = User::create($data);
+        event(new UserRegistered($user));
         return $user->toArray();
     }
 

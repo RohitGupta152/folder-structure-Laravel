@@ -18,9 +18,12 @@ use App\Repository\UserRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
+    protected $listen = [
+        \App\Events\UserRegistered::class => [
+            \App\Listeners\SendWelcomeEmail::class,
+        ],
+    ];
+
     public function register(): void
     {
         $this->app->bind(StudentRepositoryInterface::class, StudentRepository::class);
@@ -34,9 +37,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Modules\Student\BO\StudentBO::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         //
