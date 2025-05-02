@@ -1,0 +1,15 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Rohit\\V1\\": "packages/Rohit/V1/src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Rohit\\V1\\V1ServiceProvider"
+      ]
+    }
+  }
+}

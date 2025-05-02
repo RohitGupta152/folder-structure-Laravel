@@ -238,3 +238,7 @@ Route::get('/context', [HomeController::class, 'index']);
 Route::get('/test-job', [SomeController::class, 'dispatchJob']);
 
 Route::get('/test-http', [HttpClient::class, 'testClient']);
+
+Route::get('/test-package', function () {
+    return welcome_message('Rohit');
+});
