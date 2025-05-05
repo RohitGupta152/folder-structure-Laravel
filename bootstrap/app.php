@@ -7,6 +7,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Response;
 use App\Console\Commands\GetDBNameCommand;
 use App\Http\Middleware\AddRequestContext;
+use Illuminate\Console\Scheduling\Schedule;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -47,4 +48,9 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\DatabaseConnectionTestCommand::class,
         \App\Console\Commands\MultiConnectionTestCommand::class,
         \App\Console\Commands\DatabaseQueryPerformanceCommand::class,
-    ])->create();
+        \App\Console\Commands\DeleteOldPosts::class,
+    ])
+    ->withSchedule(function (Schedule $schedule) {
+        // $schedule->call(new DeleteRecentUsers)->daily();
+    })
+    ->create();
