@@ -13,6 +13,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HttpClient;
 use App\Http\Controllers\SomeController;
 use App\Http\Controllers\SystemController;
+use App\Http\Controllers\RateLimitTestController;
 
 Route::get('/cache-test', function () {
     $cacheKey = 'test_data';
@@ -247,3 +248,14 @@ Route::get('/test-package', function () {
 Route::get('/run-process', [SystemController::class, 'runCommand']);
 
 Route::get('/make-controller', [SystemController::class, 'makeController']);
+
+Route::get('/send-message', [RateLimitTestController::class, 'sendMessage']);
+Route::get('/clear-limit', [RateLimitTestController::class, 'clearRateLimit']);
+
+//  Use Middleware Rate Limiting Instead (HTTP Route Method)
+Route::middleware('throttle:5,1')->get('/send-message2', function () {
+    return response()->json([
+        'success' => true,
+        'message' => 'Message sent with middleware rate limit.'
+    ]);
+});
