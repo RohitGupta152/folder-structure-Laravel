@@ -14,6 +14,7 @@ use App\Http\Controllers\HttpClient;
 use App\Http\Controllers\SomeController;
 use App\Http\Controllers\SystemController;
 use App\Http\Controllers\RateLimitTestController;
+use App\Http\Controllers\ProductBatchController;
 
 Route::get('/cache-test', function () {
     $cacheKey = 'test_data';
@@ -259,3 +260,5 @@ Route::middleware('throttle:5,1')->get('/send-message2', function () {
         'message' => 'Message sent with middleware rate limit.'
     ]);
 });
+
+Route::get('/import-products', [ProductBatchController::class, 'import']);
