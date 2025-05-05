@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\HttpClient;
 use App\Http\Controllers\SomeController;
+use App\Http\Controllers\SystemController;
 
 Route::get('/cache-test', function () {
     $cacheKey = 'test_data';
@@ -242,3 +243,7 @@ Route::get('/test-http', [HttpClient::class, 'testClient']);
 Route::get('/test-package', function () {
     return welcome_message('Rohit');
 });
+
+Route::get('/run-process', [SystemController::class, 'runCommand']);
+
+Route::get('/make-controller', [SystemController::class, 'makeController']);
