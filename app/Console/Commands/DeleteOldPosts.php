@@ -14,8 +14,6 @@ class DeleteOldPosts extends Command
 
     public function handle()
     {
-        $date = Carbon::now()->subDays(30);
-
         $posts = Post::limit(10)->get();
 
         if ($posts->isEmpty()) {
